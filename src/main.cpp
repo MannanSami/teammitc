@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 
-#include "tokenization.h"
+#include "tokenizer.h"
 
 std::string tokens_to_asm(const std::vector<Token>& tokens) {
     std::stringstream output;
