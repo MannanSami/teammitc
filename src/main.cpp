@@ -3,59 +3,7 @@
 #include <sstream>
 #include <vector>
 
-enum class TokenType {
-    exit,
-    int_lit,
-    semi,
-};
-
-struct Token {
-    TokenType type;
-    std::optional<std::string> value {};
-};
-
-std::vector<Token> tokenize(const std::string& input) {
-    std::vector<Token> tokens;
-    std::string buffer;
-    for (int i = 0; i < input.size(); i++) {
-        const char c = input.at(i);
-        if (isalpha(c) || c == '_') {
-            buffer.push_back(c);
-            i++;
-            while (isalnum(input.at(i))) {
-                buffer.push_back(input.at(i));
-                i++;
-            }
-            i--;
-            if (buffer == "exit") {
-                tokens.push_back({.type = TokenType::exit});
-                buffer.clear();
-                continue;
-            }  else {
-                std::cerr << "Unrecognized token type: " << buffer << std::endl;
-                exit(EXIT_FAILURE);
-            }
-        }
-        else if (isdigit(c)) {
-            buffer.push_back(c);
-            i++;
-            while (isdigit(input.at(i))) {
-                buffer.push_back(input.at(i));
-                i++;
-            }
-            i--;
-            tokens.push_back({.type = TokenType::int_lit, .value = buffer});
-            buffer.clear();
-        } else if (isspace(c)) {
-            continue;
-        } else if (c == ';') {
-            tokens.push_back({.type = TokenType::semi});
-        } else {
-            std::cerr << "Unrecognized token type: " << buffer << std::endl;
-        }
-    }
-    return tokens;
-}
+#include "tokenization.h"
 
 std::string tokens_to_asm(const std::vector<Token>& tokens) {
     std::stringstream output;
@@ -97,7 +45,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    std::vector<Token> tokens = tokenize(contents);
+    Tokenizer tokenizer(std::move(contents));
+
+    std::vector<Token> tokens = tokenizer.tokenize();
     std::println("{}", tokens_to_asm(tokens));
     {
         std::fstream file("output.asm", std::ios::out);
@@ -106,7 +56,6 @@ int main(int argc, char *argv[]) {
 
     system("as -o output.o output.asm");
     system("ld -o output output.o -lSystem -syslibroot `xcrun --sdk macosx --show-sdk-path` -e _main -arch arm64");
-
 
     return EXIT_SUCCESS;
 }

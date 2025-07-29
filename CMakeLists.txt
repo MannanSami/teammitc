@@ -3,4 +3,6 @@ project(teammitc)
 
 set(CMAKE_CXX_STANDARD 26)
 
-add_executable(teammitc src/main.cpp)
+add_executable(teammitc src/main.cpp
+        src/tokenization.h
+)
